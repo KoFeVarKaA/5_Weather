@@ -14,9 +14,18 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+# Здесь описываются различные маршруты
+
 from django.contrib import admin
-from django.urls import path
+from django.urls import include, path
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('', include("weather.urls")), # Явно не привязываемся к weather
 ]
+
+# Если захочу переопределить страницы ошибок (Только при DEBUG = False)
+# handler404 = page_not_found
+# Пример ф-ии: def page_not_foung(request, exeptions):
+# Также оно обработается при raise Http404()
+
