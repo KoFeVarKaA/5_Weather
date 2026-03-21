@@ -7,7 +7,8 @@ from .converters import FourDigitYearConverter
 register_converter(FourDigitYearConverter, "year4")
 
 urlpatterns = [
-    path('', WeatherViews.index), # Главная страница
+    path('', WeatherViews.index, name='home'), # Главная страница
+    path('get_exl', WeatherViews.get_example, name='get_example'),
     # path('/smthg/<int:id>/', WeatherViews.something), # С query и конвертером
     # path('/smthg/<slug:text>/', WeatherViews.something), # Если не сработает int, отработает slug
 

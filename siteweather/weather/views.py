@@ -1,5 +1,5 @@
 from django.http import HttpRequest, HttpResponse
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 
 # Create your views here.
 class WeatherViews():
@@ -18,3 +18,8 @@ class WeatherViews():
     # Пути с re_path
     # def archive(request: HttpRequest, year):
     #     return HttpResponse(f"C re_path {year}")
+
+    # Redirect
+    # def something(request: HttpRequest):
+    #     return redirect('get_example') #Можно указывать name из path
+    #     return HttpResponseRedirect('/')
