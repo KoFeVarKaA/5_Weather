@@ -10,7 +10,7 @@ class Locations(models.Model):
     longitude - Долгота локации
     """
     name = models.CharField()
-    user_id = models.ManyToManyField(User, on_delete=models.CASCADE)
+    user_id = models.ManyToManyField(User)
     latitude = models.DecimalField()
     longitude = models.DecimalField()
 
