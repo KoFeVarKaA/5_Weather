@@ -1,9 +1,11 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{title}}</title>
+    <link rel="icon" href="{% static 'favicon2.ico' %}" type="image/x-icon">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
@@ -13,17 +15,17 @@
         <div>
             {% if user.is_authenticated %}
                 <span class="me-3">Добро пожаловать, {{ user.username }}!</span>
-                <a href="{% url 'logout' %}" class="btn btn-outline-danger">     Logout</a>
+                <a href="{% url 'users:logout' %}" class="btn btn-outline-danger">     Logout</a>
             {% else %}
-                <a href="{% url 'login' %}" class="btn btn-outline-primary me-2">Авторизация</a>
-                <a href="{% url 'register' %}" class="btn btn-primary">          Регистрация</a>
+                <a href="{% url 'users:authorization' %}" class="btn btn-outline-primary me-2">Авторизация</a>
+                <a href="{% url 'users:registration' %}" class="btn btn-primary">          Регистрация</a>
             {% endif %}
         </div>
     </header>
 
         <!-- Поле поиска -->
         <div class="mb-4">
-            <form method="GET" action="{% url 'index' %}" class="d-flex">
+            <form method="GET" action="{% url 'home' %}" class="d-flex">
                 <input
                     type="text"
                     name="search"
@@ -38,7 +40,7 @@
         <!-- Список локаций -->
         <div class="card">
             <div class="card-header">
-                <h5>{{ card-header }}</h5>
+                <h5>{{ card_header }}</h5>
             </div>
             <div class="card-body">
                 {% if locations %}
@@ -57,7 +59,7 @@
                         {% endfor %}
                     </ul>
                 {% else %}
-                    <p class="text-muted">{{ text-muted }}</p>
+                    <p class="text-muted">{{ text_muted }}</p>
                 {% endif %}
             </div>
         </div>
