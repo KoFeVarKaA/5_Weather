@@ -30,7 +30,7 @@
                     type="text"
                     name="search"
                     class="form-control me-2"
-                    placeholder="Введите название локации..."
+                    placeholder="Введите название локации... {% if not locations %} (Например, Москва) {% endif %}"
                     value="{{ search_query|default:'' }}"
                 >
                 <button type="submit" class="btn btn-primary">Поиск</button>
