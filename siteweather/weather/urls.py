@@ -4,5 +4,6 @@ from . import views
 
 urlpatterns = [
     path('', views.main, name='home'),  # http://127.0.0.1:8000
-    path('search/', views.search, name='seatch'),
+    path('search/', views.SearchView.as_view(), name='search'),
+    path('add_location/<str:location_name>/<str:country>/', views.AddLocationView.as_view(), name='add_location'),
 ]

@@ -1,0 +1,29 @@
+{% extends 'base_template.html' %}
+
+{% block locations %}
+        <div class="card">
+            <div class="card-header">
+                <h5>{{ card_header }}</h5>
+            </div>
+            <div class="card-body">
+                {% if locations %}
+                    <ul class="list-group">
+                        {% for location in locations %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>{{ location.name }}</strong>
+                                    <span class="badge bg-primary ms-2">{{ location.temperature }}°C</span>
+                                </div>
+                                <form method="POST" action="{% url 'delete_location' location.id %}" class="m-0">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">Удалить</button>
+                                </form>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="text-muted">{{ text_muted }}</p>
+                {% endif %}
+            </div>
+        </div>
+{% endblock %}

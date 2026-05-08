@@ -1,11 +1,20 @@
 #!/usr/bin/env python
 """Django's command-line utility for administrative tasks."""
+import logging
 import os
 import sys
 
 
 def main():
     """Run administrative tasks."""
+    logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.StreamHandler()
+    ]
+)
+
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'siteweather.settings')
     try:
         from django.core.management import execute_from_command_line

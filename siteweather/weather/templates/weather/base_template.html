@@ -1,3 +1,4 @@
+{% load filters %}
 {% load static %}
 <!DOCTYPE html>
 <html lang="ru">
@@ -11,7 +12,10 @@
 <body>
 <div class="container mt-4">
     <header class="d-flex justify-content-between align-items-center mb-4">
-        <h1>Погодный сервис</h1> <!-- Блок кнопок для авторизации -->
+        <a href="{% url 'home' %}" class="text-decoration-none text-dark">
+                <h1 class="m-0">Погодный сервис</h1>
+        </a>
+         <!-- Блок кнопок для авторизации -->
         <div>
             {% if user.is_authenticated %}
                 <span class="me-3">Добро пожаловать, {{ user.username }}!</span>
@@ -23,12 +27,23 @@
         </div>
     </header>
 
+        <!-- Обработка ошибок -->
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-danger"
+                role="alert"
+                style="border-radius: 8px;">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
         <!-- Поле поиска -->
         <div class="mb-4">
-            <form method="GET" action="{% url 'home' %}" class="d-flex">
+            <form method="GET" action="{% url 'search' %}" class="d-flex">
                 <input
                     type="text"
-                    name="search"
+                    name="place"
                     class="form-control me-2"
                     placeholder="Введите название локации... {% if not locations %} (Например, Москва) {% endif %}"
                     value="{{ search_query|default:'' }}"
@@ -51,9 +66,10 @@
                                     <strong>{{ location.name }}</strong>
                                     <span class="badge bg-primary ms-2">{{ location.temperature }}°C</span>
                                 </div>
-                                <form method="POST" action="{% url 'delete_location' location.id %}" class="m-0">
+                                <form method="POST" action="{% url 'add_location' location.name location.country %}" class="m-0">
                                     {% csrf_token %}
-                                    <button type="submit" class="btn btn-sm btn-outline-danger">Удалить</button>
+                                    <input type="hidden" name="location_data" value="{{ location|to_json }}">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">{{ button_submit }}</button>
                                 </form>
                             </li>
                         {% endfor %}
