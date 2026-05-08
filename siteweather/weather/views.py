@@ -29,39 +29,49 @@ ERROR_MESAGES = {
 }
 
 
-def main(request: HttpRequest):
-    locations = []
-    if request.user.is_authenticated:
-        text_muted = "У вас пока нет добавленных локаций"
-        locations = Locations.objects.filter(user_id=request.user.id)
-    else:
-        text_muted = "Войдите или зарегестрируйтесь, чтобы увидеть свои локации"
+class MainView(View):
+    def __init__(self):
+        self.template = 'weather/search.html'
 
-    data = {
-        "card_header": "Ваши локации",
-        "text_muted": text_muted,
-        "button_submit": "Добавить",
-        "locations" : locations
-    }
-    return render(request, 'weather/base_template.html', data)
+    def get(self, request: HttpRequest):
+        locations = []
+        if request.user.is_authenticated:
+            text_muted = "У вас пока нет добавленных локаций"
+            locations = Locations.objects.filter(user_id=request.user.id)
+        else:
+            text_muted = "Войдите или зарегестрируйтесь, чтобы увидеть свои локации"
+
+        data = {
+            "card_header": "Ваши локации",
+            "text_muted": text_muted,
+            "button_submit": "Добавить",
+            "locations" : locations
+        }
+        return render(request, 'weather/user_locations.html', data)
 
 class SearchView(View):
+    def __init__(self):
+        self.template = 'weather/search.html'
+
     @handle_api_errors
     def get(self, request: HttpRequest):
-        place = request.GET.get('place', '').lower()
+        place = request.GET.get('place', '')
+        data = {
+            "card_header": "Результаты поиска",
+            "text_muted": "Локации не найдены",
+            "search_value": place,
+            "button_submit": "Добавить"
+        }
+        place = place.lower()
 
         cache_key = f"search_results_{place}"
         # cached_data = cache.get(cache_key)
         # if cached_data is not None:
         if False:
             print("Использовали кэш")
-            return render(request, 'weather/base_template.html', cached_data)
+            return render(request, self.template, cached_data)
 
-        data = {
-            "card_header": "Результаты поиска",
-            "text_muted": "Локации не найдены",
-            "button_submit": "Добавить"
-        }
+        
         if place:
             url = f'https://api.openweathermap.org/geo/1.0/direct'
             params ={
@@ -133,21 +143,26 @@ class SearchView(View):
         "state": "England"
     }
 ]
-            message = ''
+            message = None
 
             if locations:
                 locations = _locations_countries_validations(locations)
             data["locations"] = locations
-            data["messages"] = [message]
+            data["messages"] = [message] if message else None
 
         # cache.set(cache_key, data, timeout=3600)
-        return render(request, 'weather/base_template.html', data)
+        return render(request, self.template, data)
 
 class AddLocationView(View):
-    def post(self, request: HttpRequest, location_id: int):
+    def post(self, request: HttpRequest, location_name: str, country: str):
         if request.user.is_authenticated:
             data = json.loads(request.body)
-            location = get_object_or_404(Locations, id= data.get("location_id"))
+            location = Locations.objects.get_or_create(
+                name = data.get("name", "Ошибка загрузки"),
+                user_id = request.user.id,
+                latitude = data.get("lat", "Ошибка загрузки"),
+                longitude = data.get("lon", "Ошибка загрузки"),
+            )
             location.user_id.add(request.user)
             return redirect('home')
         else:
@@ -160,7 +175,6 @@ class DeleteLocationView(LoginRequiredMixin, View):
         return redirect('home')
     
 # Сделать "карточки", в которых использовать данные из ответа openweather"
-# Кешировать функцию (Остановился)
 # Дописать post
 
 

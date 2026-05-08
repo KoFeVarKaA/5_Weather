@@ -1,4 +1,3 @@
-{% load filters %}
 {% load static %}
 <!DOCTYPE html>
 <html lang="ru">
@@ -45,6 +44,7 @@
                     type="text"
                     name="place"
                     class="form-control me-2"
+                    value="{%if search_value%}{{search_value}}{%endif%}"
                     placeholder="Введите название локации... {% if not locations %} (Например, Москва) {% endif %}"
                     value="{{ search_query|default:'' }}"
                 >
@@ -53,32 +53,8 @@
         </div>
 
         <!-- Список локаций -->
-        <div class="card">
-            <div class="card-header">
-                <h5>{{ card_header }}</h5>
-            </div>
-            <div class="card-body">
-                {% if locations %}
-                    <ul class="list-group">
-                        {% for location in locations %}
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <div>
-                                    <strong>{{ location.name }}</strong>
-                                    <span class="badge bg-primary ms-2">{{ location.temperature }}°C</span>
-                                </div>
-                                <form method="POST" action="{% url 'add_location' location.name location.country %}" class="m-0">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="location_data" value="{{ location|to_json }}">
-                                    <button type="submit" class="btn btn-sm btn-outline-danger">{{ button_submit }}</button>
-                                </form>
-                            </li>
-                        {% endfor %}
-                    </ul>
-                {% else %}
-                    <p class="text-muted">{{ text_muted }}</p>
-                {% endif %}
-            </div>
-        </div>
+        {% block locations %}
+        {% endblock %}
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

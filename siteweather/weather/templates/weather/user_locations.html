@@ -1,4 +1,5 @@
-{% extends 'base_template.html' %}
+{% extends 'weather/base_template.html' %}
+{% load filters %}
 
 {% block locations %}
         <div class="card">
@@ -14,9 +15,10 @@
                                     <strong>{{ location.name }}</strong>
                                     <span class="badge bg-primary ms-2">{{ location.temperature }}°C</span>
                                 </div>
-                                <form method="POST" action="{% url 'delete_location' location.id %}" class="m-0">
+                                <form method="POST" action="{% url 'add_location' location.name location.country %}" class="m-0">
                                     {% csrf_token %}
-                                    <button type="submit" class="btn btn-sm btn-outline-danger">Удалить</button>
+                                    <input type="hidden" name="location_data" value="{{ location|to_json }}">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">{{ button_submit }}</button>
                                 </form>
                             </li>
                         {% endfor %}
@@ -26,4 +28,5 @@
                 {% endif %}
             </div>
         </div>
+    </div>
 {% endblock %}
