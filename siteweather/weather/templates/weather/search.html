@@ -57,12 +57,15 @@
 
         </div>
 
+        <!-- Конопка "Добавить" -->
         <div class="card-footer bg-transparent">
-        <form method="POST" action="{% url 'add_location' location.name location.country %}" class="m-0">
+        <form method="POST" action="{% url 'add_location' location.name location.country %}" class="m-0" 
+                id="addLocationForm">
             {% csrf_token %}
-            <input type="hidden" name="location_data" value="{{ location|to_json }}">
+            <input type="hidden" name="search_value" value="{{ search_value }}">
+            <input type="hidden" name="location" value="{{ location|to_json }}">
             <button type="submit" class="btn btn-sm btn-outline-primary w-100">
-                <i class="bi bi-plus-circle me-1"></i> {{ button_submit|default:"Добавить" }}
+                <i class="bi bi-plus-circle me-1"></i> Добавить
             </button>
         </form>
         </div>

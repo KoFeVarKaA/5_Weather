@@ -56,7 +56,6 @@ WSGI_APPLICATION = 'siteweather.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 port = os.getenv('DB_PORT')
-print(port)
 
 DATABASES = {
     "default": {

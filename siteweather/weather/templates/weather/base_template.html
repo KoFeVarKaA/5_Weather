@@ -18,7 +18,7 @@
         <div>
             {% if user.is_authenticated %}
                 <span class="me-3">Добро пожаловать, {{ user.username }}!</span>
-                <a href="{% url 'users:logout' %}" class="btn btn-outline-danger">     Logout</a>
+                <a href="{% url 'users:logout' %}" class="btn btn-danger">     Выйти</a>
             {% else %}
                 <a href="{% url 'users:authorization' %}" class="btn btn-outline-primary me-2">Авторизация</a>
                 <a href="{% url 'users:registration' %}" class="btn btn-primary">          Регистрация</a>
@@ -26,10 +26,11 @@
         </div>
     </header>
 
+
         <!-- Обработка ошибок -->
         {% if messages %}
             {% for message in messages %}
-                <div class="alert alert-danger"
+                <div class="alert alert-effect alert-danger"
                 role="alert"
                 style="border-radius: 8px;">
                     {{ message }}
@@ -58,5 +59,6 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{% static 'weather/js/alert_effects.js' %}"></script> 
 </body>
 </html>

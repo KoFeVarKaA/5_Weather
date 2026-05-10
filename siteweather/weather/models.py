@@ -11,8 +11,8 @@ class Locations(models.Model):
     """
     name = models.CharField()
     user_id = models.ManyToManyField(User)
-    latitude = models.DecimalField(max_digits=6, decimal_places=6)
-    longitude = models.DecimalField(max_digits=6, decimal_places=6)
+    latitude = models.DecimalField(max_digits=12, decimal_places=9)
+    longitude = models.DecimalField(max_digits=12, decimal_places=9)
 
     def __str__(self):
         return self.name

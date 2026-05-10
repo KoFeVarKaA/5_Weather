@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+from django.urls import reverse
 import pycountry
 from pycountry.db import Country
 import requests
@@ -37,10 +38,56 @@ class MainView(View):
         locations = []
         if request.user.is_authenticated:
             text_muted = "У вас пока нет добавленных локаций"
-            locations = Locations.objects.filter(user_id=request.user.id)
+            # locations = Locations.objects.filter(user_id=request.user.id)
         else:
             text_muted = "Войдите или зарегестрируйтесь, чтобы увидеть свои локации"
-
+        location = {
+          "coord": {
+            "lon": 37.6173,
+            "lat": 55.7558
+          },
+          "weather": [
+            {
+              "id": 800,
+              "main": "Clear",
+              "description": "clear sky",
+              "icon": "01d"
+            }
+          ],
+          "base": "stations",
+          "main": {
+            "temp": 15.5,
+            "feels_like": 14.8,
+            "temp_min": 14.0,
+            "temp_max": 17.0,
+            "pressure": 1012,
+            "humidity": 65,
+            "sea_level": 1012,
+            "grnd_level": 1008
+          },
+          "visibility": 10000,
+          "wind": {
+            "speed": 3.5,
+            "deg": 180,
+            "gust": 4.2
+          },
+          "clouds": {
+            "all": 0
+          },
+          "dt": 1654567890,
+          "sys": {
+            "type": 1,
+            "id": 9021,
+            "country": "RU",
+            "sunrise": 1654541234,
+            "sunset": 1654591234
+          },
+          "timezone": 10800,
+          "id": 524901,
+          "name": "Moscow",
+          "cod": 200
+        }
+        locations = [location]
         data = {
             "card_header": "Ваши локации",
             "text_muted": text_muted,
@@ -83,90 +130,99 @@ class SearchView(View):
             # logging.info(f"making request: \n\t\t\turl={url}, \n\t\t\tparams={params}")
             # locations, message = _process_response(response)
             locations = [
-    {
-        "name": "Moscow",
-        "local_names": {
-            "ru": "Москва",
-            "en": "Moscow",
-            "fr": "Moscou",
-            "de": "Moskau",
-            "es": "Moscú"
-        },
-        "lat": 55.7504461,
-        "lon": 37.6174943,
-        "country": "RU",
-        "state": "Moscow"
-    },
-    {
-        "name": "Moscow",
-        "local_names": {
-            "en": "Moscow",
-            "ru": "Москва"
-        },
-        "lat": 46.7323875,
-        "lon": -117.0001651,
-        "country": "US",
-        "state": "Idaho"
-    },
-    {
-        "name": "Berkarar obasy",
-        "local_names": {
-            "ru": "Беркарар",
-            "tk": "Berkarar obasy"
-        },
-        "lat": 37.41866695,
-        "lon": 60.42703721312893,
-        "country": "TM",
-        "state": "Ahal Region"
-    },
-    {
-        "name": "Moskwa",
-        "local_names": {
-            "pl": "Moskwa",
-            "ru": "Москва"
-        },
-        "lat": 51.8158099,
-        "lon": 19.6573685,
-        "country": "PL",
-        "state": "Łódź Voivodeship"
-    },
-    {
-        "name": "London",
-        "local_names": {
-            "ru": "Лондон",
-            "en": "London",
-            "fr": "Londres"
-        },
-        "lat": 51.5073509,
-        "lon": -0.127758,
-        "country": "GB",
-        "state": "England"
-    }
-]
+            {
+                "name": "Moscow",
+                "local_names": {
+                    "ru": "Москва",
+                    "en": "Moscow",
+                    "fr": "Moscou",
+                    "de": "Moskau",
+                    "es": "Moscú"
+                },
+                "lat": 55.7504461,
+                "lon": 37.6174943,
+                "country": "RU",
+                "state": "Moscow"
+            },
+            {
+                "name": "Moscow",
+                "local_names": {
+                    "en": "Moscow",
+                    "ru": "Москва"
+                },
+                "lat": 46.7323875,
+                "lon": -117.0001651,
+                "country": "US",
+                "state": "Idaho"
+            },
+            {
+                "name": "Berkarar obasy",
+                "local_names": {
+                    "ru": "Беркарар",
+                    "tk": "Berkarar obasy"
+                },
+                "lat": 37.41866695,
+                "lon": 60.42703721312893,
+                "country": "TM",
+                "state": "Ahal Region"
+            },
+            {
+                "name": "Moskwa",
+                "local_names": {
+                    "pl": "Moskwa",
+                    "ru": "Москва"
+                },
+                "lat": 51.8158099,
+                "lon": 19.6573685,
+                "country": "PL",
+                "state": "Łódź Voivodeship"
+            },
+            {
+                "name": "London",
+                "local_names": {
+                    "ru": "Лондон",
+                    "en": "London",
+                    "fr": "Londres"
+                },
+                "lat": 51.5073509,
+                "lon": -0.127758,
+                "country": "GB",
+                "state": "England"
+            }
+        ]
             message = None
 
             if locations:
                 locations = _locations_countries_validations(locations)
             data["locations"] = locations
-            data["messages"] = [message] if message else None
-
+        if message:
+            messages.warning(message)
         # cache.set(cache_key, data, timeout=3600)
         return render(request, self.template, data)
+
+
 
 class AddLocationView(View):
     def post(self, request: HttpRequest, location_name: str, country: str):
         if request.user.is_authenticated:
-            data = json.loads(request.body)
-            location = Locations.objects.get_or_create(
-                name = data.get("name", "Ошибка загрузки"),
-                user_id = request.user.id,
-                latitude = data.get("lat", "Ошибка загрузки"),
-                longitude = data.get("lon", "Ошибка загрузки"),
-            )
+            data_json = request.POST.get("location", "{}")
+            try:
+                data = json.loads(data_json)
+            except json.JSONDecodeError:
+                messages.error(request, "Ошибка при обработке данных локации")
+                return redirect(f"{reverse('search')}?place={request.POST.get('search_value', '')}")
+            location, created = Locations.objects.get_or_create(
+                name=data.get("name", "Ошибка загрузки"),
+                defaults={
+                    "latitude": data.get("lat", 0.0),
+                    "longitude": data.get("lon", 0.0),
+                    }
+                )
             location.user_id.add(request.user)
             return redirect('home')
         else:
             messages.warning(request, "Чтобы добавить локацию нужно быть зарегестрированным")
+            return redirect(f"{reverse('search')}?place={request.POST.get('search_value', '')}")
 
 class DeleteLocationView(LoginRequiredMixin, View):
     def post(self, request: HttpRequest, location_id: int):
@@ -175,7 +231,7 @@ class DeleteLocationView(LoginRequiredMixin, View):
         return redirect('home')
     
 # Сделать "карточки", в которых использовать данные из ответа openweather"
-# Дописать post
+# Дописать post (Проблема с координатами)
 
 
 def _process_response(response: requests.Response) -> tuple[list, str|None]:
