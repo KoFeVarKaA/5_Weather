@@ -1,22 +1,20 @@
 import json
 import logging
 import os
-from django.urls import reverse
+
 import pycountry
-from pycountry.db import Country
 import requests
-
-from dotenv import load_dotenv
-from django.http import HttpRequest, HttpResponse
 from django.contrib import messages
-from django.shortcuts import redirect, render, get_object_or_404
-from django.core.cache import cache
-from django.views.generic import View
 from django.contrib.auth.mixins import LoginRequiredMixin
-
+from django.core.cache import cache
+from django.http import HttpRequest, HttpResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
+from django.views.generic import View
+from dotenv import load_dotenv
+from pycountry.db import Country
 
 from .decorators import handle_api_errors
-
 from .models import Locations
 
 load_dotenv()
