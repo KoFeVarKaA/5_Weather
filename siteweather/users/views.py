@@ -1,9 +1,9 @@
 from django.contrib.auth import logout
 from django.contrib.auth.views import LoginView
-from django.http import HttpRequest, HttpResponse
-from django.shortcuts import redirect, render
+from django.http import HttpRequest
+from django.shortcuts import redirect
 from django.urls import reverse_lazy
-from django.views.generic import CreateView, UpdateView
+from django.views.generic import CreateView
 
 from .forms import LoginUserForm, RegisterUserForm
 

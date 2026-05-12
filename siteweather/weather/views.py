@@ -7,12 +7,10 @@ import requests
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.cache import cache
-from django.http import HttpRequest, HttpResponse
-from django.shortcuts import get_object_or_404, redirect, render
-from django.urls import reverse
+from django.http import HttpRequest
+from django.shortcuts import redirect, render
 from django.views.generic import View
 from dotenv import load_dotenv
-from pycountry.db import Country
 
 from .decorators import handle_api_errors
 from .models import Locations
@@ -43,7 +41,7 @@ class MainView(View):
             response = cached_data
 
         else:
-            url = f"https://api.openweathermap.org/data/2.5/weather"
+            url = "https://api.openweathermap.org/data/2.5/weather"
             params = {
                 "appid": os.getenv("OPENWEATHER_API_KEY"),
                 "q": location.name,
@@ -106,7 +104,7 @@ class SearchView(View):
             return render(request, self.template, cached_data)
 
         if place:
-            url = f"https://api.openweathermap.org/geo/1.0/direct"
+            url = "https://api.openweathermap.org/geo/1.0/direct"
             params = {"q": place, "limit": 5, "appid": os.getenv("OPENWEATHER_API_KEY")}
             MY_LOGGER.info(
                 f"making request: \n\t\t\turl={url}, \n\t\t\tparams={params}"
@@ -133,8 +131,7 @@ class AddLocationView(View):
         redirect_url = "search"
         if request.user.is_authenticated:
             if (
-                Locations.objects.filter(user_id=request.user.id).count()
-                > self._max_locations_count
+                Locations.objects.filter(user_id=request.user.id).count() > self._max_locations_count
             ):
                 messages.warning(
                     "Максимальное количество локаций - 4. Чтобы добавить новую локацию удалите одну из добавленных."

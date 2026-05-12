@@ -13,3 +13,15 @@ dependencies = [
     "redis>=7.4.0",
     "requests>=2.33.1",
 ]
+
+[tool.flake8]
+ignore = ["E501"]
+exclude = [
+    ".venv",
+    "venv",
+    "__pycache__",
+    "migrations",
+    "static",
+    "media",
+    ".git"
+]

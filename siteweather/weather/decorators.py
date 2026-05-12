@@ -1,10 +1,8 @@
 from functools import wraps
 
 import requests
-from django.contrib import messages
-from django.core.cache import cache
 from django.http import HttpRequest
-from django.shortcuts import redirect, render
+from django.shortcuts import render
 
 # def cache_search_result(timeout=3600):
 #     def decorator(view_func):
