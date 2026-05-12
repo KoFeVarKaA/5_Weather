@@ -5,7 +5,6 @@ from django.contrib import messages
 from django.shortcuts import redirect, render
 from django.core.cache import cache
 
-
 # def cache_search_result(timeout=3600):
 #     def decorator(view_func):
 #         @wraps(view_func)
@@ -15,13 +14,14 @@ from django.core.cache import cache
 #             cached_data = cache.get(cache_key)
 #             if cached_data is not None:
 #                 return render(request, 'weather/base_template.html', cached_data)
-            
+
 #             context = view_func(request, place, *args, **kwargs)
-            
+
 #             cache.set(cache_key, context, timeout=timeout)
 #             return render(request, 'weather/base_template.html', context)
 #         return wrapper
 #     return decorator
+
 
 # Возможно убрать messages
 def handle_api_errors(view_func):
@@ -29,17 +29,20 @@ def handle_api_errors(view_func):
     def wrapper(request: HttpRequest, *args, **kwargs):
         try:
             return view_func(request, *args, **kwargs)
-        
+
         except requests.exceptions.Timeout:
-            return _render_error_response(request, "Запрос занял слишком много времени. Попробуйте позже.")
-        
+            _render_error_response(
+                request, "Запрос к api занял слишком много времени. Попробуйте позже."
+            )
+
         except requests.exceptions.RequestException as e:
-            return _render_error_response(request, f"Ошибка соединения: {str(e)}")
-        
+            _render_error_response(request, f"Ошибка соединения: {str(e)}")
+
         except Exception as e:
-            return _render_error_response(request, f"Произошла ошибка: {str(e)}")
+            _render_error_response(request, f"Произошла ошибка: {str(e)}")
 
     return wrapper
+
 
 def _render_error_response(request, message):
     data = {
@@ -47,4 +50,4 @@ def _render_error_response(request, message):
         "text_muted": "Не удалось получить данные",
         "messages": [message],
     }
-    return render(request, 'weather/base_template.html', data)
+    return render(request, "weather/base_template.html", data)

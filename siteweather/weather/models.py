@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+
 # Create your models here.
 class Locations(models.Model):
     """
@@ -9,6 +10,7 @@ class Locations(models.Model):
     latitude - Широта локации
     longitude - Долгота локации
     """
+
     name = models.CharField()
     user_id = models.ManyToManyField(User)
     latitude = models.DecimalField(max_digits=12, decimal_places=9)

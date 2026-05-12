@@ -19,7 +19,8 @@ from .decorators import handle_api_errors
 
 from .models import Locations
 
-load_dotenv() 
+load_dotenv()
+MY_LOGGER = logging.getLogger("my_app")
 
 ERROR_MESAGES = {
     400: "Некорректный запрос. Проверьте название локации.",
@@ -31,230 +32,186 @@ ERROR_MESAGES = {
 
 
 class MainView(View):
-    def __init__(self):
-        self.template = 'weather/search.html'
+    __slots__ = "template"
 
-    def get(self, request: HttpRequest):
-        locations = []
-        if request.user.is_authenticated:
-            text_muted = "У вас пока нет добавленных локаций"
-            # locations = Locations.objects.filter(user_id=request.user.id)
+    def __init__(self):
+        self.template = "weather/search.html"
+
+    def _make_api_request(self, location: Locations):
+        cache_key = f"location_{location.name}"
+        cached_data = cache.get(cache_key)
+        if cached_data is not None:
+            MY_LOGGER.info("Использовали кэш")
+            response = cached_data
+
         else:
-            text_muted = "Войдите или зарегестрируйтесь, чтобы увидеть свои локации"
-        location = {
-          "coord": {
-            "lon": 37.6173,
-            "lat": 55.7558
-          },
-          "weather": [
-            {
-              "id": 800,
-              "main": "Clear",
-              "description": "clear sky",
-              "icon": "01d"
+            url = f"https://api.openweathermap.org/data/2.5/weather"
+            params = {
+                "appid": os.getenv("OPENWEATHER_API_KEY"),
+                "q": location.name,
+                "units": "metric",
+                "lang": "ru",
+                "lon": location.longitude,
+                "lat": location.latitude,
             }
-          ],
-          "base": "stations",
-          "main": {
-            "temp": 15.5,
-            "feels_like": 14.8,
-            "temp_min": 14.0,
-            "temp_max": 17.0,
-            "pressure": 1012,
-            "humidity": 65,
-            "sea_level": 1012,
-            "grnd_level": 1008
-          },
-          "visibility": 10000,
-          "wind": {
-            "speed": 3.5,
-            "deg": 180,
-            "gust": 4.2
-          },
-          "clouds": {
-            "all": 0
-          },
-          "dt": 1654567890,
-          "sys": {
-            "type": 1,
-            "id": 9021,
-            "country": "RU",
-            "sunrise": 1654541234,
-            "sunset": 1654591234
-          },
-          "timezone": 10800,
-          "id": 524901,
-          "name": "Moscow",
-          "cod": 200
-        }
-        locations = [location]
-        data = {
-            "card_header": "Ваши локации",
-            "text_muted": text_muted,
-            "button_submit": "Добавить",
-            "locations" : locations
-        }
-        return render(request, 'weather/user_locations.html', data)
+            MY_LOGGER.info(
+                f"making request: \n\t\t\turl={url}, \n\t\t\tparams={params}"
+            )
+            response = requests.get(url=url, params=params)
+            cache.set(cache_key, response, timeout=3600)
 
-class SearchView(View):
-    def __init__(self):
-        self.template = 'weather/search.html'
+        return response
 
     @handle_api_errors
     def get(self, request: HttpRequest):
-        place = request.GET.get('place', '')
+        locations_processed = []
+        if request.user.is_authenticated:
+            locations = Locations.objects.filter(user_id=request.user.id)
+            locations_processed = []
+            for location in locations:
+                response = self._make_api_request(location)
+                location_api, message = _process_response(response)
+                location_api["locaton_id"] = location.pk
+                locations_processed.append(location_api)
+                if message:
+                    messages.warning(message)
+
+        data = {
+            "card_header": "Ваши локации",
+            "button_submit": "Добавить",
+            "locations": locations_processed,
+        }
+        return render(request, "weather/user_locations.html", data)
+
+
+class SearchView(View):
+    __slots__ = "template"
+
+    def __init__(self):
+        self.template = "weather/search.html"
+
+    @handle_api_errors
+    def get(self, request: HttpRequest):
+        place = request.GET.get("place", "")
         data = {
             "card_header": "Результаты поиска",
             "text_muted": "Локации не найдены",
             "search_value": place,
-            "button_submit": "Добавить"
+            "button_submit": "Добавить",
         }
         place = place.lower()
 
         cache_key = f"search_results_{place}"
-        # cached_data = cache.get(cache_key)
-        # if cached_data is not None:
-        if False:
-            print("Использовали кэш")
+        cached_data = cache.get(cache_key)
+        if cached_data is not None:
+            MY_LOGGER.info("Использовали кэш")
             return render(request, self.template, cached_data)
 
-        
         if place:
-            url = f'https://api.openweathermap.org/geo/1.0/direct'
-            params ={
-                    "q" : place,
-                    "limit" : 5,
-                    "appid" : os.getenv("OPENWEATHER_API_KEY")
-                }
-            # response = requests.get(url=url, params=params)
-            # logging.info(f"making request: \n\t\t\turl={url}, \n\t\t\tparams={params}")
-            # locations, message = _process_response(response)
-            locations = [
-            {
-                "name": "Moscow",
-                "local_names": {
-                    "ru": "Москва",
-                    "en": "Moscow",
-                    "fr": "Moscou",
-                    "de": "Moskau",
-                    "es": "Moscú"
-                },
-                "lat": 55.7504461,
-                "lon": 37.6174943,
-                "country": "RU",
-                "state": "Moscow"
-            },
-            {
-                "name": "Moscow",
-                "local_names": {
-                    "en": "Moscow",
-                    "ru": "Москва"
-                },
-                "lat": 46.7323875,
-                "lon": -117.0001651,
-                "country": "US",
-                "state": "Idaho"
-            },
-            {
-                "name": "Berkarar obasy",
-                "local_names": {
-                    "ru": "Беркарар",
-                    "tk": "Berkarar obasy"
-                },
-                "lat": 37.41866695,
-                "lon": 60.42703721312893,
-                "country": "TM",
-                "state": "Ahal Region"
-            },
-            {
-                "name": "Moskwa",
-                "local_names": {
-                    "pl": "Moskwa",
-                    "ru": "Москва"
-                },
-                "lat": 51.8158099,
-                "lon": 19.6573685,
-                "country": "PL",
-                "state": "Łódź Voivodeship"
-            },
-            {
-                "name": "London",
-                "local_names": {
-                    "ru": "Лондон",
-                    "en": "London",
-                    "fr": "Londres"
-                },
-                "lat": 51.5073509,
-                "lon": -0.127758,
-                "country": "GB",
-                "state": "England"
-            }
-        ]
-            message = None
+            url = f"https://api.openweathermap.org/geo/1.0/direct"
+            params = {"q": place, "limit": 5, "appid": os.getenv("OPENWEATHER_API_KEY")}
+            MY_LOGGER.info(
+                f"making request: \n\t\t\turl={url}, \n\t\t\tparams={params}"
+            )
+            response = requests.get(url=url, params=params)
+            locations, message = _process_response(response)
 
             if locations:
                 locations = _locations_countries_validations(locations)
             data["locations"] = locations
         if message:
             messages.warning(message)
-        # cache.set(cache_key, data, timeout=3600)
+        cache.set(cache_key, data, timeout=3600)
         return render(request, self.template, data)
 
 
-
 class AddLocationView(View):
-    def post(self, request: HttpRequest, location_name: str, country: str):
+    __slots__ = "_max_locations_count"
+
+    def __init__(self):
+        self._max_locations_count = 4  # Максимально возможное количество локаций
+
+    def post(self, request: HttpRequest):
+        redirect_url = "search"
         if request.user.is_authenticated:
+            if (
+                Locations.objects.filter(user_id=request.user.id).count()
+                > self._max_locations_count
+            ):
+                messages.warning(
+                    "Максимальное количество локаций - 4. Чтобы добавить новую локацию удалите одну из добавленных."
+                )
+                return redirect(redirect_url)
+
             data_json = request.POST.get("location", "{}")
             try:
                 data = json.loads(data_json)
             except json.JSONDecodeError:
                 messages.error(request, "Ошибка при обработке данных локации")
-                return redirect(f"{reverse('search')}?place={request.POST.get('search_value', '')}")
+                return redirect(redirect_url)
+
+            if Locations.objects.filter(
+                name=data.get("name", "-"), user_id=request.user
+            ).exists():
+                messages.warning(request, "Данная локация уже добавлена")
+                return redirect("home")
+
             location, created = Locations.objects.get_or_create(
                 name=data.get("name", "Ошибка загрузки"),
                 defaults={
                     "latitude": data.get("lat", 0.0),
                     "longitude": data.get("lon", 0.0),
-                    }
-                )
+                },
+            )
             location.user_id.add(request.user)
-            return redirect('home')
+            return redirect("home")
+
         else:
-            messages.warning(request, "Чтобы добавить локацию нужно быть зарегестрированным")
-            return redirect(f"{reverse('search')}?place={request.POST.get('search_value', '')}")
+            messages.warning(
+                request, "Чтобы добавить локацию нужно быть зарегестрированным"
+            )
+            return redirect(redirect_url)
+
 
 class DeleteLocationView(LoginRequiredMixin, View):
     def post(self, request: HttpRequest, location_id: int):
-        location = get_object_or_404(Locations, id=location_id, user=request.user)
-        location.delete()
-        return redirect('home')
-    
-# Сделать "карточки", в которых использовать данные из ответа openweather"
-# Дописать post (Проблема с координатами)
+        try:
+            location = Locations.objects.get(id=location_id, user_id=request.user)
+            location.user_id.remove(request.user)
+
+        except Locations.DoesNotExist:
+            messages.error(request, "Локация не найдена")
+        except Exception as e:
+            MY_LOGGER.error(e)
+            messages.error(request, f"Ошибка удаления локации: {e}")
+
+        return redirect("home")
 
 
-def _process_response(response: requests.Response) -> tuple[list, str|None]:
+def _process_response(response: requests.Response) -> tuple[list | dict, str | None]:
     if response.status_code == 200:
         message = None
         locations = response.json()
     else:
         error_message = response.json().get("message", response.status_code)
-        message = ERROR_MESAGES.get(response.status_code, 
-            f"Произошла непредвиденная ошибка при обращении к API ({error_message})")
-        
+        message = ERROR_MESAGES.get(
+            response.status_code,
+            f"Произошла непредвиденная ошибка при обращении к API ({error_message})",
+        )
+
         locations = []
     return locations, message
+
 
 def _locations_countries_validations(locations: list[dict]) -> list[dict]:
     for location in locations:
         try:
             country = pycountry.countries.get(alpha_2=location["country"])
-            if hasattr(country, 'translations') and country.translations:
+            if hasattr(country, "translations") and country.translations:
                 location["country"] = country.translations.get("ru", country.name)
             else:
-                location["country"] = country.name 
+                location["country"] = country.name
         except Exception as e:
-            print(e)
+            MY_LOGGER.error(e)
             continue
     return locations

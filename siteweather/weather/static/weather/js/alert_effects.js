@@ -10,6 +10,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 // Полное удаление из документа после завершения анимации
                 setTimeout(() => alert.remove(), 500);
-            }, 1000); 
+            }, 10000); 
         });
     });

@@ -31,7 +31,7 @@
             
     <div class="card-body">
         <!-- Кнопка удаления -->
-            <form method="post" action="{% url 'delete_location' location.id %}" class="position-absolute top-0 end-0 m-2">
+            <form method="post" action="{% url 'delete_location' location.locaton_id %}" class="position-absolute top-0 end-0 m-2">
                 {% csrf_token %}
                 <button type="submit" class="btn-close" aria-label="Удалить"></button>
             </form>
@@ -90,15 +90,20 @@
         </div>
         </div>
 
-        {% empty %}
-        <div class="col-12">
-            <div class="alert alert-info text-center">
-                <i class="bi bi-info-circle me-2"></i>
-                {{ text_muted|default:"Локации не найдены. Попробуйте выполнить поиск." }}
-            </div>
+{% empty %}
+</div>
+</div>
+<main class="container mt-4">
+    <div class="card-footer bg-transparent border-top-0 px-3">
+        <div class="alert alert-info mt-2 mb-0 p-2 px-3 text-center">
+            <i class="bi bi-info-circle me-2"></i>
+            Локации не найдены. Попробуйте выполнить поиск.
         </div>
-        {% endfor %}
     </div>
+</main>
+<div>
+{% endfor %}
+</div>
 {% endif %}
 </main>
 
