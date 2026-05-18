@@ -1,3 +1,5 @@
+import logging
+
 from django.contrib.auth import logout
 from django.contrib.auth.views import LoginView
 from django.http import HttpRequest
@@ -22,18 +24,6 @@ class RegisterUser(CreateView):
     template_name = "users/base_template.html"
     extra_context = {"title": "Регистрация", "button_text": "Зарегистрироваться"}
     success_url = reverse_lazy("users:authorization")
-
-    def post(self, request, *args, **kwargs):
-        print("POST request received in RegisterUser")
-        return super().post(request, *args, **kwargs)
-
-    def form_valid(self, form):
-        print("Form is valid, saving user")
-        return super().form_valid(form)
-
-    def form_invalid(self, form):
-        print("Form is invalid:", form.errors)
-        return super().form_invalid(form)
 
 
 def logout_view(request: HttpRequest):

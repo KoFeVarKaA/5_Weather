@@ -37,7 +37,7 @@ class MainView(View):
         cache_key = f"location_{location.name}"
         cached_data = cache.get(cache_key)
         if cached_data is not None:
-            MY_LOGGER.info("Использовали кэш")
+            MY_LOGGER.debug("Использовали кэш")
             response = cached_data
 
         else:
@@ -50,7 +50,7 @@ class MainView(View):
                 "lon": location.longitude,
                 "lat": location.latitude,
             }
-            MY_LOGGER.info(
+            MY_LOGGER.debug(
                 f"making request: \n\t\t\turl={url}, \n\t\t\tparams={params}"
             )
             response = requests.get(url=url, params=params)

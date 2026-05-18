@@ -10,7 +10,19 @@
             "type": "debugpy",
             "request": "launch",
             "args": [
-                "runserver"
+                "runserver",
+            ],
+            "django": true,
+            "autoStartBrowser": false,
+            "program": "${workspaceFolder}\\siteweather\\manage.py"
+        },
+        {
+            "name": "Отладчик Django тестов weather",
+            "type": "debugpy",
+            "request": "launch",
+            "args": [
+                "test",
+                "weather",
             ],
             "django": true,
             "autoStartBrowser": false,
