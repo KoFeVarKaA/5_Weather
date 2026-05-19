@@ -4,25 +4,6 @@ import requests
 from django.http import HttpRequest
 from django.shortcuts import render
 
-# def cache_search_result(timeout=3600):
-#     def decorator(view_func):
-#         @wraps(view_func)
-#         def wrapper(request: HttpRequest, *args, **kwargs):
-#             place = request.GET.get('place', '')
-#             cache_key = f"search_results_{place.lower()}"
-#             cached_data = cache.get(cache_key)
-#             if cached_data is not None:
-#                 return render(request, 'weather/base_template.html', cached_data)
-
-#             context = view_func(request, place, *args, **kwargs)
-
-#             cache.set(cache_key, context, timeout=timeout)
-#             return render(request, 'weather/base_template.html', context)
-#         return wrapper
-#     return decorator
-
-
-# Возможно убрать messages
 def handle_api_errors(view_func):
     @wraps(view_func)
     def wrapper(request: HttpRequest, *args, **kwargs):
