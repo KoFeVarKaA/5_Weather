@@ -11,15 +11,15 @@ def handle_api_errors(view_func):
             return view_func(request, *args, **kwargs)
 
         except requests.exceptions.Timeout:
-            _render_error_response(
+            return _render_error_response(
                 request, "Запрос к api занял слишком много времени. Попробуйте позже."
             )
 
         except requests.exceptions.RequestException as e:
-            _render_error_response(request, f"Ошибка соединения: {str(e)}")
+            return _render_error_response(request, f"Ошибка соединения: {str(e)}")
 
         except Exception as e:
-            _render_error_response(request, f"Произошла ошибка: {str(e)}")
+            return _render_error_response(request, f"Произошла ошибка: {str(e)}")
 
     return wrapper
 
