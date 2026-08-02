@@ -1,8 +1,11 @@
 from functools import wraps
+import logging
 
 import requests
 from django.http import HttpRequest
 from django.shortcuts import render
+
+MY_LOGGER = logging.getLogger("my_app")
 
 def handle_api_errors(view_func):
     @wraps(view_func)
@@ -10,7 +13,8 @@ def handle_api_errors(view_func):
         try:
             return view_func(request, *args, **kwargs)
 
-        except requests.exceptions.Timeout:
+        except (requests.exceptions.Timeout, SystemExit) as e:
+            MY_LOGGER.error("SystemExit or Timeout")
             return _render_error_response(
                 request, "Запрос к api занял слишком много времени. Попробуйте позже."
             )

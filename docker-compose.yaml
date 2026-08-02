@@ -10,13 +10,15 @@ services:
     expose:
       - 8000
     depends_on:
-      - postgres
-      - redis
+      redis:
+        condition: service_started
+      postgres:
+        condition: service_healthy
     volumes:
-      - static_volume:/user/static
+      - static_volume:/user/staticfiles
     command: >
           sh -c "python manage.py collectstatic --noinput &&
-                 chmod -R 755 /user/static &&
+                 chmod -R 755 /user/staticfiles &&
                  python manage.py migrate &&
                  gunicorn siteweather.wsgi:application --bind 0.0.0.0:8000"
     networks:
@@ -38,6 +40,11 @@ services:
       POSTGRES_PASSWORD: "password"
     ports:
       - "5435:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 3s
+      timeout: 3s
+      retries: 5
     networks:
       - dev
 
@@ -45,11 +52,11 @@ services:
     build:
       context: ./docker/nginx/
     volumes:
-      - static_volume:/user/static
+      - static_volume:/user/staticfiles
     depends_on:
       - django
     ports:
-      - "80:80"
+      - "8001:80"
     networks:
       - dev
 
